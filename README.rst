@@ -8,6 +8,7 @@ and domain name as a list of namedtuples.
 Installation
 ------------
 srvlookup is available on the `Python Package Index <https://pypi.python.org/pypi/srvlookup>`_. Simply:
+
 .. code:: bash
 
     pip install srvlookup
