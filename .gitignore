@@ -1,0 +1,6 @@
+.idea
+*.pyo
+*.pyc
+nosetests.xml
+.DS_Store
+.coverage
