@@ -10,6 +10,9 @@ import logging
 from dns import resolver
 import socket
 
+__version__ = (0, 1, 0)
+version = '%s.%s.%s' % __version__
+
 LOGGER = logging.getLogger(__name__)
 
 SRV = namedtuple('SRV', ['host', 'port', 'priority', 'weight'])
