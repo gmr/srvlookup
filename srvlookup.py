@@ -55,6 +55,7 @@ def lookup(name, protocol='TCP', domain=None):
                        record.weight) for record in answer],
                   key=lambda r: r.priority)
 
+
 def _get_domain():
     """Return the domain name for the local host.
 
