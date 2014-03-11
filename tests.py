@@ -42,6 +42,22 @@ foo.bar.baz. 0    IN  SRV 1 0 11211 1.2.3.5.
                              [srvlookup.SRV('1.2.3.4', 11211, 1, 0),
                               srvlookup.SRV('1.2.3.5', 11211, 1, 0)])
 
+    def test_should_include_local_domain_when_omitted(self):
+
+        with mock.patch('dns.resolver.query') as query:
+            with mock.patch('socket.getfqdn') as getfqdn:
+                getfqdn.return_value = 'baz'
+                query_name = name.from_text('foo.bar.baz.')
+                msg = message.from_text(self.MESSAGE)
+                answer = resolver.Answer(query_name,
+                                         33, 1, msg,
+                                         msg.answer[0])
+                query.return_value = answer
+                self.assertEqual(srvlookup.lookup('foo', 'bar'),
+                                 [srvlookup.SRV('1.2.3.4', 11211, 1, 0),
+                                  srvlookup.SRV('1.2.3.5', 11211, 1, 0)])
+
+
 
 class WhenInvokingGetDomain(unittest.TestCase):
 

@@ -21,10 +21,11 @@ class SRVQueryFailure(Exception):
         return 'SRV query failure: %s' % self.args[0]
 
 
-def lookup(name, protocol, domain=None):
+def lookup(name, protocol='TCP', domain=None):
     """Return a list of service records and associated data for the given
-    service name, protocol and optional domain. If domain is not specified,
-    then the domain name returned by the operating system will be used.
+    service name, protocol and optional domain. If protocol is not specified,
+    TCP will be used. If domain is not specified, the domain name returned by
+    the operating system will be used.
 
     Service records will be returned as a named tuple with host, port, priority
     and weight attributes:
@@ -38,8 +39,8 @@ def lookup(name, protocol, domain=None):
         >>>
 
     :param str name: The service name
-    :param str protocol: The protocol name
-    :param str domain: The domain name to use
+    :param str protocol: The protocol name, defaults to TCP
+    :param str domain: The domain name to use, defaults to local domain name
     :rtype: list of srvlookup.SRV
 
     """
