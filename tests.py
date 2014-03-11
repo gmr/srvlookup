@@ -58,7 +58,6 @@ foo.bar.baz. 0    IN  SRV 1 0 11211 1.2.3.5.
                                   srvlookup.SRV('1.2.3.5', 11211, 1, 0)])
 
 
-
 class WhenInvokingGetDomain(unittest.TestCase):
 
     EXPECTATION = 'bar.baz.qux'
