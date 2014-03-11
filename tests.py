@@ -26,7 +26,7 @@ flags QR AA RD
 ;QUESTION
 foo.bar.baz. IN SRV
 ;ANSWER
-foo.bar.baz. 0    IN  SRV 1 0 11211 1.2.3.4.
+foo.bar.baz. 0    IN  SRV 2 0 11211 1.2.3.4.
 foo.bar.baz. 0    IN  SRV 1 0 11211 1.2.3.5.
 """
 
@@ -39,8 +39,8 @@ foo.bar.baz. 0    IN  SRV 1 0 11211 1.2.3.5.
                                      msg.answer[0])
             query.return_value = answer
             self.assertEqual(srvlookup.lookup('foo', 'bar', 'baz'),
-                             [srvlookup.SRV('1.2.3.4', 11211, 1, 0),
-                              srvlookup.SRV('1.2.3.5', 11211, 1, 0)])
+                             [srvlookup.SRV('1.2.3.5', 11211, 1, 0),
+                              srvlookup.SRV('1.2.3.4', 11211, 2, 0)])
 
     def test_should_include_local_domain_when_omitted(self):
 
@@ -54,8 +54,8 @@ foo.bar.baz. 0    IN  SRV 1 0 11211 1.2.3.5.
                                          msg.answer[0])
                 query.return_value = answer
                 self.assertEqual(srvlookup.lookup('foo', 'bar'),
-                                 [srvlookup.SRV('1.2.3.4', 11211, 1, 0),
-                                  srvlookup.SRV('1.2.3.5', 11211, 1, 0)])
+                                 [srvlookup.SRV('1.2.3.5', 11211, 1, 0),
+                                  srvlookup.SRV('1.2.3.4', 11211, 2, 0)])
 
 
 class WhenInvokingGetDomain(unittest.TestCase):

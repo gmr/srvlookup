@@ -46,11 +46,11 @@ def lookup(name, protocol='TCP', domain=None):
     """
     answer = _query_srv_records('_%s._%s.%s' % (name, protocol,
                                                 domain or _get_domain()))
-    return [SRV(str(record.target).rstrip('.'),
-                record.port,
-                record.priority,
-                record.weight) for record in answer]
-
+    return sorted([SRV(str(record.target).rstrip('.'),
+                       record.port,
+                       record.priority,
+                       record.weight) for record in answer],
+                  key=lambda r: r.priority)
 
 def _get_domain():
     """Return the domain name for the local host.
