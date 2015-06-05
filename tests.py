@@ -18,22 +18,21 @@ class WhenRaisingException(unittest.TestCase):
 
 class WhenLookingUpRecords(unittest.TestCase):
 
-    MESSAGE = """\
-id 1234
-opcode QUERY
-rcode NOERROR
-flags QR AA RD
-;QUESTION
-foo.bar.baz. IN SRV
-;ANSWER
-foo.bar.baz. 0    IN  SRV 2 0 11211 1.2.3.4.
-foo.bar.baz. 0    IN  SRV 1 0 11211 1.2.3.5.
-"""
+    def get_message(self):
+        message_body = [
+            'id 1234', 'opcode QUERY', 'rcode NOERROR', 'flags QR AA RD',
+            ';QUESTION',
+            'foo.bar.baz. IN SRV',
+            ';ANSWER',
+            'foo.bar.baz. 0 IN SRV 2 0 11211 1.2.3.4.',
+            'foo.bar.baz. 0 IN SRV 1 0 11211 1.2.3.5.',
+        ]
+        return message.from_text('\n'.join(message_body))
 
     def test_should_return_a_list_of_records(self):
         with mock.patch('dns.resolver.query') as query:
             query_name = name.from_text('foo.bar.baz.')
-            msg = message.from_text(self.MESSAGE)
+            msg = self.get_message()
             answer = resolver.Answer(query_name,
                                      33, 1, msg,
                                      msg.answer[0])
@@ -48,7 +47,7 @@ foo.bar.baz. 0    IN  SRV 1 0 11211 1.2.3.5.
             with mock.patch('socket.getfqdn') as getfqdn:
                 getfqdn.return_value = 'baz'
                 query_name = name.from_text('foo.bar.baz.')
-                msg = message.from_text(self.MESSAGE)
+                msg = self.get_message()
                 answer = resolver.Answer(query_name,
                                          33, 1, msg,
                                          msg.answer[0])
