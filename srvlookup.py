@@ -5,9 +5,9 @@ Service Lookup
 Use DNS SRV records to discover services by name and protocol.
 
 """
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 import logging
-from dns import resolver
+from dns import rdatatype, resolver
 import socket
 
 __version__ = (0, 1, 0)
@@ -49,11 +49,8 @@ def lookup(name, protocol='TCP', domain=None):
     """
     answer = _query_srv_records('_%s._%s.%s' % (name, protocol,
                                                 domain or _get_domain()))
-    return sorted([SRV(str(record.target).rstrip('.'),
-                       record.port,
-                       record.priority,
-                       record.weight) for record in answer],
-                  key=lambda r: r.priority)
+    results = _build_result_set(answer)
+    return sorted(results, key=lambda r: r.priority)
 
 
 def _get_domain():
@@ -83,3 +80,47 @@ def _query_srv_records(fqdn):
             resolver.NXDOMAIN) as error:
         LOGGER.error('Error querying SRV for %s: %r', fqdn, error)
         raise SRVQueryFailure(error.__class__.__name__)
+
+
+def _build_resource_to_address_map(answer):
+    """Return a dictionary that maps resource name to address.
+
+    The response from any DNS query is a list of answer records and
+    a list of additional records that may be useful.  In the case of
+    SRV queries, the answer section contains SRV records which contain
+    the service weighting information and a DNS resource name which
+    requires further resolution.  The additional records segment may
+    contain A records for the resources.  This function collects them
+    into a dictionary that maps resource name to an array of addresses.
+
+    :rtype: dict
+
+    """
+    mapping = defaultdict(list)
+    for resource in answer.response.additional:
+        target = resource.name.to_text()
+        mapping[target].extend(record.address
+                               for record in resource.items
+                               if record.rdtype == rdatatype.A)
+    return mapping
+
+
+def _build_result_set(answer):
+    """Return a list of SRV instances for a DNS answer.
+
+    :rtype: list of srvlookup.SRV
+
+    """
+    resource_map = _build_resource_to_address_map(answer)
+    result_set = []
+    for resource in answer:
+        target = resource.target.to_text()
+        if target in resource_map:
+            result_set.extend(
+                SRV(address, resource.port,
+                    resource.priority, resource.weight)
+                for address in resource_map[target])
+        else:
+            result_set.append(SRV(target.rstrip('.'), resource.port,
+                                  resource.priority, resource.weight))
+    return result_set
