@@ -5,7 +5,11 @@ tests_require = ['nose', 'mock']
 if sys.version_info < (2, 7, 0):
     tests_require.append('unittest2')
 
-dnspython = 'dnspython' if sys.version_info < (3, 0, 0) else 'dnspython3'
+requirements = []
+if sys.version_info < (3, 0, 0):
+    requirements.append('dnspython>=1.12.0,<2.0')
+else:
+    requirements.append('dnspython3>=1.12.0,<2.0')
 
 setuptools.setup(name='srvlookup',
                  version='0.1.0',
@@ -17,7 +21,7 @@ setuptools.setup(name='srvlookup',
                  py_modules=['srvlookup'],
                  package_data={'': ['LICENSE', 'README.rst']},
                  include_package_data=True,
-                 install_requires=[dnspython],
+                 install_requires=requirements,
                  tests_require=tests_require,
                  test_suite='nose.collector',
                  license=open('LICENSE').read(),
