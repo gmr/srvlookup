@@ -1,18 +1,24 @@
 language: python
-
 python:
-  - 2.6
-  - 2.7
-  - pypy
-  - 3.2
-  - 3.3
-
+- 2.6
+- 2.7
+- pypy
+- 3.2
+- 3.3
 install:
-  - "pip install . --use-mirrors"
-
+- pip install . --use-mirrors
 script: nosetests
-
 notifications:
   email:
     recipients:
-      - travisci@aweber.com
+    - travisci@aweber.com
+deploy:
+  provider: pypi
+  user: aweber
+  password:
+    secure: GRdDvsIMH+DJ4k/mDjQ41Vt6MtrGKZsEj6UGV/mlZkdbscRIoh+7zf07uQXQIyL50VDCZkFlhsoeLqs4OZo+BoCPcs0HVBH3ksf8j4CiGCMRGFeXladgD4aX5LH3OURTJSSB+nrEv8HyzZmhnF57q+Q7Rbc/WqWrioOTO7af+Cc=
+  on:
+    tags: true
+    repo: aweber/srvlookup
+    all_branches: true
+    python: 2.7
