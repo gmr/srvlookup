@@ -16,7 +16,7 @@ deploy:
   provider: pypi
   user: aweber
   password:
-    secure: GRdDvsIMH+DJ4k/mDjQ41Vt6MtrGKZsEj6UGV/mlZkdbscRIoh+7zf07uQXQIyL50VDCZkFlhsoeLqs4OZo+BoCPcs0HVBH3ksf8j4CiGCMRGFeXladgD4aX5LH3OURTJSSB+nrEv8HyzZmhnF57q+Q7Rbc/WqWrioOTO7af+Cc=
+    secure: DhyiG/Nb3cWTymnlCxE0938C0Ke0er8CLsljLm3UUupVrXKCgf6qKVqe77KPWSlVMWQB7jAnKakAITYLnLbbr5vIU/ak12m310UTuKSzZE+o9Mi4oOknOqXj1ROZGOGdCMkMaAn5Wxo4qzrQshGb+1dADvecPtSgywHRGlRtTpQ=
   on:
     tags: true
     repo: aweber/srvlookup
