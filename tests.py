@@ -18,28 +18,33 @@ class WhenRaisingException(unittest.TestCase):
 
 class WhenLookingUpRecords(unittest.TestCase):
 
-    MESSAGE = """\
-id 1234
-opcode QUERY
-rcode NOERROR
-flags QR AA RD
-;QUESTION
-foo.bar.baz. IN SRV
-;ANSWER
-foo.bar.baz. 0    IN  SRV 2 0 11211 1.2.3.4.
-foo.bar.baz. 0    IN  SRV 1 0 11211 1.2.3.5.
-"""
+    def get_message(self, additional_answers=None):
+        message_body = [
+            'id 1234', 'opcode QUERY', 'rcode NOERROR', 'flags QR AA RD',
+            ';QUESTION',
+            'foo.bar.baz. IN SRV',
+            ';ANSWER',
+            'foo.bar.baz. 0 IN SRV 2 0 11211 foo1.bar.baz.',
+            'foo.bar.baz. 0 IN SRV 1 0 11212 foo2.bar.baz.',
+        ]
+        message_body.extend(additional_answers or [])
+        message_body.extend([
+            ';ADDITIONAL',
+            'foo1.bar.baz.  5 IN A 1.2.3.4',
+            'foo2.bar.baz.  5 IN A 1.2.3.5',
+        ])
+        return message.from_text('\n'.join(message_body))
 
     def test_should_return_a_list_of_records(self):
         with mock.patch('dns.resolver.query') as query:
             query_name = name.from_text('foo.bar.baz.')
-            msg = message.from_text(self.MESSAGE)
+            msg = self.get_message()
             answer = resolver.Answer(query_name,
                                      33, 1, msg,
                                      msg.answer[0])
             query.return_value = answer
             self.assertEqual(srvlookup.lookup('foo', 'bar', 'baz'),
-                             [srvlookup.SRV('1.2.3.5', 11211, 1, 0),
+                             [srvlookup.SRV('1.2.3.5', 11212, 1, 0),
                               srvlookup.SRV('1.2.3.4', 11211, 2, 0)])
 
     def test_should_include_local_domain_when_omitted(self):
@@ -48,14 +53,28 @@ foo.bar.baz. 0    IN  SRV 1 0 11211 1.2.3.5.
             with mock.patch('socket.getfqdn') as getfqdn:
                 getfqdn.return_value = 'baz'
                 query_name = name.from_text('foo.bar.baz.')
-                msg = message.from_text(self.MESSAGE)
+                msg = self.get_message()
                 answer = resolver.Answer(query_name,
                                          33, 1, msg,
                                          msg.answer[0])
                 query.return_value = answer
                 self.assertEqual(srvlookup.lookup('foo', 'bar'),
-                                 [srvlookup.SRV('1.2.3.5', 11211, 1, 0),
+                                 [srvlookup.SRV('1.2.3.5', 11212, 1, 0),
                                   srvlookup.SRV('1.2.3.4', 11211, 2, 0)])
+
+    def test_should_return_name_when_addt_record_is_missing(self):
+        with mock.patch('dns.resolver.query') as query:
+            query_name = name.from_text('foo.bar.baz.')
+            msg = self.get_message(additional_answers=[
+                'foo.bar.baz. 0 IN SRV 3 0 11213 foo3.bar.baz.'])
+            answer = resolver.Answer(query_name,
+                                     33, 1, msg,
+                                     msg.answer[0])
+            query.return_value = answer
+            self.assertEqual(srvlookup.lookup('foo', 'bar', 'baz'),
+                             [srvlookup.SRV('1.2.3.5', 11212, 1, 0),
+                              srvlookup.SRV('1.2.3.4', 11211, 2, 0),
+                              srvlookup.SRV('foo3.bar.baz', 11213, 3, 0)])
 
 
 class WhenInvokingGetDomain(unittest.TestCase):

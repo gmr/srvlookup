@@ -25,6 +25,13 @@ Example
      SRV(host='192.168.1.126', port=11211, priority=1, weight=0)]
     >>>
 
+Testing
+-------
+.. code:: bash
+    
+    python setup.py nosetests
+
+
 Requirements
 ------------
 
