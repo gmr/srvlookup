@@ -14,9 +14,9 @@ notifications:
     - travisci@aweber.com
 deploy:
   provider: pypi
-  user: aweber
+  user: sprockets
   password:
-    secure: ZA9hYIJA7AZwCeytO04OiJA5UQ6Ktbjg1ImFhSCXaF2y6wMtVedummF4lWMvDLlpmcFv7/TNQPyQMreLeXUoP+A7N1tZSywi9dZTONsBpdWjhyf1YR/NYP611g7/fXctSCVL4rrU/5Kq6AskjRG199+ZXcmlFRL3HLyY4hCCeS0=
+    secure: BrBleAN0R/Hqflp7JmaOFp8O33rCfS6f/xqYPrxLR2yuNltWKIpQ1K6y+uZQV3l8f/4Jpvlil4RuWeXiLbUwpD7LeduUnBozGMiKLy3nymB6/Gm14+Bmt6DcR+gWLwJQBaTfSg+XyQMK0Js6+VCxSE+OfKWDhmUDLBlJunIyHmE=
   on:
     tags: true
     repo: aweber/srvlookup
