@@ -12,7 +12,7 @@ else:
     requirements.append('dnspython3>=1.12.0,<2.0')
 
 setuptools.setup(name='srvlookup',
-                 version='0.1.0',
+                 version='0.2.0',
                  description='Service lookup using DNS SRV records',
                  long_description=open('README.rst').read(),
                  author='Gavin M. Roy',
