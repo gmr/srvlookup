@@ -10,8 +10,7 @@ import logging
 from dns import rdatatype, resolver
 import socket
 
-__version__ = (0, 1, 0)
-version = '%s.%s.%s' % __version__
+__version__ = '1.0.0'
 
 LOGGER = logging.getLogger(__name__)
 
