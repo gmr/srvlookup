@@ -50,7 +50,7 @@ def lookup(name, protocol='TCP', domain=None):
     answer = _query_srv_records('_%s._%s.%s' % (name, protocol,
                                                 domain or _get_domain()))
     results = _build_result_set(answer)
-    return sorted(results, key=lambda r: r.priority)
+    return sorted(results, key=lambda r: (r.priority, -r.weight, r.host))
 
 
 def _get_domain():

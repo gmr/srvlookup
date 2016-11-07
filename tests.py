@@ -62,6 +62,21 @@ class WhenLookingUpRecords(unittest.TestCase):
                                  [srvlookup.SRV('1.2.3.5', 11212, 1, 0),
                                   srvlookup.SRV('1.2.3.4', 11211, 2, 0)])
 
+    def test_should_sort_records_by_priority_weight_and_host(self):
+
+        with mock.patch('dns.resolver.query') as query:
+                query_name = name.from_text('foo.bar.baz.')
+                msg = self.get_message(additional_answers=[
+                    'foo.bar.baz. 0 IN SRV 0 0 11213 foo3.bar.baz.'])
+                answer = resolver.Answer(query_name,
+                                         33, 1, msg,
+                                         msg.answer[0])
+                query.return_value = answer
+                self.assertEqual(srvlookup.lookup('foo', 'bar'),
+                                 [srvlookup.SRV('foo3.bar.baz', 11213, 0, 0),
+                                  srvlookup.SRV('1.2.3.5', 11212, 1, 0),
+                                  srvlookup.SRV('1.2.3.4', 11211, 2, 0)])
+
     def test_should_return_name_when_addt_record_is_missing(self):
         with mock.patch('dns.resolver.query') as query:
             query_name = name.from_text('foo.bar.baz.')
