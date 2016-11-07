@@ -116,13 +116,10 @@ def _build_result_set(answer):
         target = resource.target.to_text()
         if target in resource_map:
             result_set.extend(
-                SRV(address, resource.port,
-                    resource.priority, resource.weight)
+                SRV(address, resource.port, resource.priority, resource.weight)
                 for address in resource_map[target])
         else:
-            result_set.append(SRV(
-                target.decode('utf8').rstrip('.'),
-                resource.port,
-                resource.priority,
-                resource.weight))
+            result_set.append(
+                SRV(target.rstrip('.'), resource.port, resource.priority,
+                    resource.weight))
     return result_set
