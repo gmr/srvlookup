@@ -121,6 +121,9 @@ def _build_result_set(answer):
                     resource.priority, resource.weight)
                 for address in resource_map[target])
         else:
-            result_set.append(SRV(target.rstrip('.'), resource.port,
-                                  resource.priority, resource.weight))
+            result_set.append(SRV(
+                target.decode('utf8').rstrip('.'),
+                resource.port,
+                resource.priority,
+                resource.weight))
     return result_set
