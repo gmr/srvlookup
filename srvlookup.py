@@ -14,7 +14,7 @@ __version__ = '1.0.0'
 
 LOGGER = logging.getLogger(__name__)
 
-SRV = namedtuple('SRV', ['host', 'port', 'priority', 'weight'])
+SRV = namedtuple('SRV', ['host', 'port', 'priority', 'weight', 'hostname'])
 
 
 class SRVQueryFailure(Exception):
@@ -34,10 +34,10 @@ def lookup(name, protocol='TCP', domain=None):
 
         >>> import srvlookup
         >>> srvlookup.lookup('api', 'memcached')
-        [SRV(host='192.169.1.100', port=11211, priority=1, weight=0),
-         SRV(host='192.168.1.102', port=11211, priority=1, weight=0),
-         SRV(host='192.168.1.120', port=11211, priority=1, weight=0),
-         SRV(host='192.168.1.126', port=11211, priority=1, weight=0)]
+        [SRV(host='192.169.1.100', port=11211, priority=1, weight=0, hostname='host1.example.com'),
+         SRV(host='192.168.1.102', port=11211, priority=1, weight=0, hostname='host2.example.com'),
+         SRV(host='192.168.1.120', port=11211, priority=1, weight=0, hostname='host3.example.com'),
+         SRV(host='192.168.1.126', port=11211, priority=1, weight=0, hostname='host4.example.com')]
         >>>
 
     :param str name: The service name
@@ -116,10 +116,10 @@ def _build_result_set(answer):
         target = resource.target.to_text()
         if target in resource_map:
             result_set.extend(
-                SRV(address, resource.port, resource.priority, resource.weight)
+                SRV(address, resource.port, resource.priority, resource.weight, target.strip('.'))
                 for address in resource_map[target])
         else:
             result_set.append(
                 SRV(target.rstrip('.'), resource.port, resource.priority,
-                    resource.weight))
+                    resource.weight, target.strip('.')))
     return result_set
