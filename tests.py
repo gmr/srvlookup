@@ -44,8 +44,8 @@ class WhenLookingUpRecords(unittest.TestCase):
                                      msg.answer[0])
             query.return_value = answer
             self.assertEqual(srvlookup.lookup('foo', 'bar', 'baz'),
-                             [srvlookup.SRV('1.2.3.5', 11212, 1, 0),
-                              srvlookup.SRV('1.2.3.4', 11211, 2, 0)])
+                             [srvlookup.SRV('1.2.3.5', 11212, 1, 0, 'foo2.bar.baz'),
+                              srvlookup.SRV('1.2.3.4', 11211, 2, 0, 'foo1.bar.baz')])
 
     def test_should_include_local_domain_when_omitted(self):
 
@@ -59,8 +59,8 @@ class WhenLookingUpRecords(unittest.TestCase):
                                          msg.answer[0])
                 query.return_value = answer
                 self.assertEqual(srvlookup.lookup('foo', 'bar'),
-                                 [srvlookup.SRV('1.2.3.5', 11212, 1, 0),
-                                  srvlookup.SRV('1.2.3.4', 11211, 2, 0)])
+                                 [srvlookup.SRV('1.2.3.5', 11212, 1, 0, 'foo2.bar.baz'),
+                                  srvlookup.SRV('1.2.3.4', 11211, 2, 0, 'foo1.bar.baz')])
 
     def test_should_sort_records_by_priority_weight_and_host(self):
 
@@ -73,9 +73,9 @@ class WhenLookingUpRecords(unittest.TestCase):
                                          msg.answer[0])
                 query.return_value = answer
                 self.assertEqual(srvlookup.lookup('foo', 'bar'),
-                                 [srvlookup.SRV('foo3.bar.baz', 11213, 0, 0),
-                                  srvlookup.SRV('1.2.3.5', 11212, 1, 0),
-                                  srvlookup.SRV('1.2.3.4', 11211, 2, 0)])
+                                 [srvlookup.SRV('foo3.bar.baz', 11213, 0, 0, 'foo3.bar.baz'),
+                                  srvlookup.SRV('1.2.3.5', 11212, 1, 0, 'foo2.bar.baz'),
+                                  srvlookup.SRV('1.2.3.4', 11211, 2, 0, 'foo1.bar.baz')])
 
     def test_should_return_name_when_addt_record_is_missing(self):
         with mock.patch('dns.resolver.query') as query:
@@ -87,9 +87,9 @@ class WhenLookingUpRecords(unittest.TestCase):
                                      msg.answer[0])
             query.return_value = answer
             self.assertEqual(srvlookup.lookup('foo', 'bar', 'baz'),
-                             [srvlookup.SRV('1.2.3.5', 11212, 1, 0),
-                              srvlookup.SRV('1.2.3.4', 11211, 2, 0),
-                              srvlookup.SRV('foo3.bar.baz', 11213, 3, 0)])
+                             [srvlookup.SRV('1.2.3.5', 11212, 1, 0, 'foo2.bar.baz'),
+                              srvlookup.SRV('1.2.3.4', 11211, 2, 0, 'foo1.bar.baz'),
+                              srvlookup.SRV('foo3.bar.baz', 11213, 3, 0, 'foo3.bar.baz')])
 
 
 class WhenInvokingGetDomain(unittest.TestCase):
