@@ -3,7 +3,7 @@ srvlookup
 A small wrapper for dnspython to return SRV records for a given host, protocol,
 and domain name as a list of namedtuples.
 
-|Version| |Status|
+|Version| |Status| |Coverage| |License|
 
 Installation
 ------------
@@ -42,3 +42,9 @@ Requirements
 
 .. |Status| image:: https://img.shields.io/travis/gmr/srvlookup.svg?
    :target: https://travis-ci.org/gmr/srvlookup
+
+.. |Coverage| image:: https://img.shields.io/codecov/c/github/gmr/srvlookup.svg?
+   :target: https://codecov.io/github/gmr/srvlookup?branch=master
+
+.. |License| image:: https://img.shields.io/pypi/l/pika.svg?
+   :target: https://pika.readthedocs.io
