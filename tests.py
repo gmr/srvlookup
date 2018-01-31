@@ -1,15 +1,12 @@
 import mock
+import unittest
+
 from dns import message, name, resolver
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
 
 import srvlookup
 
 
 class WhenRaisingException(unittest.TestCase):
-
     def test_should_output_exception_string(self):
         msg = 'NXDOMAIN'
         x = srvlookup.SRVQueryFailure(msg)
@@ -17,10 +14,12 @@ class WhenRaisingException(unittest.TestCase):
 
 
 class WhenLookingUpRecords(unittest.TestCase):
-
     def get_message(self, additional_answers=None):
         message_body = [
-            'id 1234', 'opcode QUERY', 'rcode NOERROR', 'flags QR AA RD',
+            'id 1234',
+            'opcode QUERY',
+            'rcode NOERROR',
+            'flags QR AA RD',
             ';QUESTION',
             'foo.bar.baz. IN SRV',
             ';ANSWER',
@@ -39,13 +38,13 @@ class WhenLookingUpRecords(unittest.TestCase):
         with mock.patch('dns.resolver.query') as query:
             query_name = name.from_text('foo.bar.baz.')
             msg = self.get_message()
-            answer = resolver.Answer(query_name,
-                                     33, 1, msg,
-                                     msg.answer[0])
+            answer = resolver.Answer(query_name, 33, 1, msg, msg.answer[0])
             query.return_value = answer
-            self.assertEqual(srvlookup.lookup('foo', 'bar', 'baz'),
-                             [srvlookup.SRV('1.2.3.5', 11212, 1, 0, 'foo2.bar.baz'),
-                              srvlookup.SRV('1.2.3.4', 11211, 2, 0, 'foo1.bar.baz')])
+            self.assertEqual(
+                srvlookup.lookup('foo', 'bar', 'baz'), [
+                    srvlookup.SRV('1.2.3.5', 11212, 1, 0, 'foo2.bar.baz'),
+                    srvlookup.SRV('1.2.3.4', 11211, 2, 0, 'foo1.bar.baz')
+                ])
 
     def test_should_include_local_domain_when_omitted(self):
 
@@ -54,42 +53,44 @@ class WhenLookingUpRecords(unittest.TestCase):
                 getfqdn.return_value = 'baz'
                 query_name = name.from_text('foo.bar.baz.')
                 msg = self.get_message()
-                answer = resolver.Answer(query_name,
-                                         33, 1, msg,
-                                         msg.answer[0])
+                answer = resolver.Answer(query_name, 33, 1, msg, msg.answer[0])
                 query.return_value = answer
-                self.assertEqual(srvlookup.lookup('foo', 'bar'),
-                                 [srvlookup.SRV('1.2.3.5', 11212, 1, 0, 'foo2.bar.baz'),
-                                  srvlookup.SRV('1.2.3.4', 11211, 2, 0, 'foo1.bar.baz')])
+                self.assertEqual(
+                    srvlookup.lookup('foo', 'bar'), [
+                        srvlookup.SRV('1.2.3.5', 11212, 1, 0, 'foo2.bar.baz'),
+                        srvlookup.SRV('1.2.3.4', 11211, 2, 0, 'foo1.bar.baz')
+                    ])
 
     def test_should_sort_records_by_priority_weight_and_host(self):
 
         with mock.patch('dns.resolver.query') as query:
-                query_name = name.from_text('foo.bar.baz.')
-                msg = self.get_message(additional_answers=[
-                    'foo.bar.baz. 0 IN SRV 0 0 11213 foo3.bar.baz.'])
-                answer = resolver.Answer(query_name,
-                                         33, 1, msg,
-                                         msg.answer[0])
-                query.return_value = answer
-                self.assertEqual(srvlookup.lookup('foo', 'bar'),
-                                 [srvlookup.SRV('foo3.bar.baz', 11213, 0, 0, 'foo3.bar.baz'),
-                                  srvlookup.SRV('1.2.3.5', 11212, 1, 0, 'foo2.bar.baz'),
-                                  srvlookup.SRV('1.2.3.4', 11211, 2, 0, 'foo1.bar.baz')])
+            query_name = name.from_text('foo.bar.baz.')
+            msg = self.get_message(additional_answers=[
+                'foo.bar.baz. 0 IN SRV 0 0 11213 foo3.bar.baz.'
+            ])
+            answer = resolver.Answer(query_name, 33, 1, msg, msg.answer[0])
+            query.return_value = answer
+            self.assertEqual(
+                srvlookup.lookup('foo', 'bar'), [
+                    srvlookup.SRV('foo3.bar.baz', 11213, 0, 0, 'foo3.bar.baz'),
+                    srvlookup.SRV('1.2.3.5', 11212, 1, 0, 'foo2.bar.baz'),
+                    srvlookup.SRV('1.2.3.4', 11211, 2, 0, 'foo1.bar.baz')
+                ])
 
     def test_should_return_name_when_addt_record_is_missing(self):
         with mock.patch('dns.resolver.query') as query:
             query_name = name.from_text('foo.bar.baz.')
             msg = self.get_message(additional_answers=[
-                'foo.bar.baz. 0 IN SRV 3 0 11213 foo3.bar.baz.'])
-            answer = resolver.Answer(query_name,
-                                     33, 1, msg,
-                                     msg.answer[0])
+                'foo.bar.baz. 0 IN SRV 3 0 11213 foo3.bar.baz.'
+            ])
+            answer = resolver.Answer(query_name, 33, 1, msg, msg.answer[0])
             query.return_value = answer
-            self.assertEqual(srvlookup.lookup('foo', 'bar', 'baz'),
-                             [srvlookup.SRV('1.2.3.5', 11212, 1, 0, 'foo2.bar.baz'),
-                              srvlookup.SRV('1.2.3.4', 11211, 2, 0, 'foo1.bar.baz'),
-                              srvlookup.SRV('foo3.bar.baz', 11213, 3, 0, 'foo3.bar.baz')])
+            self.assertEqual(
+                srvlookup.lookup('foo', 'bar', 'baz'), [
+                    srvlookup.SRV('1.2.3.5', 11212, 1, 0, 'foo2.bar.baz'),
+                    srvlookup.SRV('1.2.3.4', 11211, 2, 0, 'foo1.bar.baz'),
+                    srvlookup.SRV('foo3.bar.baz', 11213, 3, 0, 'foo3.bar.baz')
+                ])
 
 
 class WhenInvokingGetDomain(unittest.TestCase):
@@ -104,13 +105,11 @@ class WhenInvokingGetDomain(unittest.TestCase):
 
 
 class WhenInvokingQuerySRVRecords(unittest.TestCase):
-
     def test_invalid_should_raise_srv_query_failure(self):
         with mock.patch('dns.resolver.query') as query:
             query.side_effect = resolver.NXDOMAIN()
             self.assertRaises(srvlookup.SRVQueryFailure,
-                              srvlookup._query_srv_records,
-                              'foo.bar.baz')
+                              srvlookup._query_srv_records, 'foo.bar.baz')
 
     def test_resolver_query_should_be_invoked_with_fqdn(self):
         with mock.patch('dns.resolver.query') as query:
@@ -123,5 +122,5 @@ class WhenInvokingQuerySRVRecords(unittest.TestCase):
         with mock.patch('dns.resolver.query') as query:
             answer = mock.Mock('dns.resolver.Answer')
             query.return_value = answer
-            self.assertEqual(srvlookup._query_srv_records('foo.bar.baz'),
-                             answer)
+            self.assertEqual(
+                srvlookup._query_srv_records('foo.bar.baz'), answer)
