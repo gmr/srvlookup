@@ -5,20 +5,23 @@ Service Lookup
 Use DNS SRV records to discover services by name and protocol.
 
 """
-from collections import defaultdict, namedtuple
+import collections
 import logging
-from dns import rdatatype, resolver
 import socket
 
-__version__ = '1.0.0'
+from dns import rdatatype, resolver
+
+__version__ = '2.0.0'
 
 LOGGER = logging.getLogger(__name__)
 
-SRV = namedtuple('SRV', ['host', 'port', 'priority', 'weight', 'hostname'])
+SRV = collections.namedtuple(
+    'SRV', ['host', 'port', 'priority', 'weight', 'hostname'])
 
 
 class SRVQueryFailure(Exception):
     """Exception that is raised when the DNS query has failed."""
+
     def __str__(self):
         return 'SRV query failure: %s' % self.args[0]
 
@@ -34,10 +37,14 @@ def lookup(name, protocol='TCP', domain=None):
 
         >>> import srvlookup
         >>> srvlookup.lookup('api', 'memcached')
-        [SRV(host='192.169.1.100', port=11211, priority=1, weight=0, hostname='host1.example.com'),
-         SRV(host='192.168.1.102', port=11211, priority=1, weight=0, hostname='host2.example.com'),
-         SRV(host='192.168.1.120', port=11211, priority=1, weight=0, hostname='host3.example.com'),
-         SRV(host='192.168.1.126', port=11211, priority=1, weight=0, hostname='host4.example.com')]
+        [SRV(host='192.169.1.100', port=11211, priority=1, weight=0,
+             hostname='host1.example.com'),
+         SRV(host='192.168.1.102', port=11211, priority=1, weight=0,
+             hostname='host2.example.com'),
+         SRV(host='192.168.1.120', port=11211, priority=1, weight=0,
+             hostname='host3.example.com'),
+         SRV(host='192.168.1.126', port=11211, priority=1, weight=0,
+             hostname='host4.example.com')]
         >>>
 
     :param str name: The service name
@@ -72,11 +79,8 @@ def _query_srv_records(fqdn):
     """
     try:
         return resolver.query(fqdn, 'SRV')
-    except (resolver.NoAnswer,
-            resolver.NoNameservers,
-            resolver.NotAbsolute,
-            resolver.NoRootSOA,
-            resolver.NXDOMAIN) as error:
+    except (resolver.NoAnswer, resolver.NoNameservers, resolver.NotAbsolute,
+            resolver.NoRootSOA, resolver.NXDOMAIN) as error:
         LOGGER.error('Error querying SRV for %s: %r', fqdn, error)
         raise SRVQueryFailure(error.__class__.__name__)
 
@@ -95,11 +99,10 @@ def _build_resource_to_address_map(answer):
     :rtype: dict
 
     """
-    mapping = defaultdict(list)
+    mapping = collections.defaultdict(list)
     for resource in answer.response.additional:
         target = resource.name.to_text()
-        mapping[target].extend(record.address
-                               for record in resource.items
+        mapping[target].extend(record.address for record in resource.items
                                if record.rdtype == rdatatype.A)
     return mapping
 
@@ -116,8 +119,8 @@ def _build_result_set(answer):
         target = resource.target.to_text()
         if target in resource_map:
             result_set.extend(
-                SRV(address, resource.port, resource.priority, resource.weight, target.strip('.'))
-                for address in resource_map[target])
+                SRV(address, resource.port, resource.priority, resource.weight,
+                    target.strip('.')) for address in resource_map[target])
         else:
             result_set.append(
                 SRV(target.rstrip('.'), resource.port, resource.priority,
