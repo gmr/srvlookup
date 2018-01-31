@@ -1,25 +1,63 @@
 sudo: false
 language: python
-python:
-  - 2.6
-  - 2.7
-  - pypy
-  - 3.3
-  - 3.4
-  - 3.5
+env:
+  global:
+   - PATH=$HOME/.local/bin:$PATH
+   - AWS_DEFAULT_REGION=us-east-1
+   - secure: "ILLkLcnmYVQj1F/p/xq78O8gQl5fApMG1ooY7+5lQB7HuRrjNMcLdtKVCLkxT9ztpsAnKvo3WAjPRWtQuxSJpa+Bppbo8k4YaQw8Id0zYHeJnQNGLRvRe3pe2kKQlheA8vKNuN9KQo2rdvpoUi9ERC3S4k8OpaUnAMRnYmMpc4E="
+   - secure: "l0QQp6xDr/Hx7RcELq3ycqMEUeHrO8VoGcHrFOsmdjf+vG3lOCx+kvaz9HoKOxvBgfpfW5Bxa2e6XDScVUuVySQYOjahlCCqgj8etkLNj3cQiFxovhryP41iTV0pdzYbq7pO1sUGcesn2Ltr9nS8ksT/t4zX7Y5y9BXYK0Vt4wE="
+
+stages:
+- test
+- coverage
+- name: deploy
+  if: tag IS present
+
 install:
-  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2; fi
-  - pip install .
-  - pip install wheel
+- python setup.py develop
+
 script: nosetests
-deploy:
-  provider: pypi
-  user: crad
-  distributions: sdist bdist_wheel
-  on:
-    tags: true
-    repo: gmr/srvlookup
-    all_branches: true
-    python: 2.7
-  password:
-    secure: "Hc6EfDEI0gbQ8XSxitEaCXBGaQPhW7f4NoWxBUDgIhJBp+VuYmT8XYX8TWco7Tq3gXSFSzq/mjK5XkouKwjmcymzO23AOyY+sZ8uV18vLXjUCbgY+vJbGs+7QLp3mtrUyp4ePebIgNosC4HyiamX67fHtLpBcDYP3MOhgx36+j8="
+
+after_success:
+- aws s3 cp .coverage "s3://com-gavinroy-travis/srvlookup/$TRAVIS_BUILD_NUMBER/.coverage.${TRAVIS_PYTHON_VERSION}"
+
+jobs:
+  include:
+  - python: 2.7
+  - python: 3.4
+  - python: 3.5
+  - python: 3.6
+  - python: pypy
+  - python: pypy3
+  - stage: coverage
+    python: 3.6
+    services: []
+    install:
+    - pip install awscli coverage codecov
+    before_script: []
+    script:
+    - mkdir coverage
+    - aws s3 cp --recursive s3://com-gavinroy-travis/srvlookup/$TRAVIS_BUILD_NUMBER/ coverage
+    - cd coverage
+    - coverage combine
+    - cd ..
+    - mv coverage/.coverage .
+    - coverage report
+    after_success: codecov
+  - stage: deploy
+    python: 3.6
+    services: []
+    install: true
+    before_script: []
+    script: true
+    after_success: []
+    deploy:
+      provider: pypi
+      user: crad
+      distributions: sdist bdist_wheel
+      on:
+        repo: gmr/srvlookup
+        all_branches: true
+        tags: true
+      password:
+        secure: "Hc6EfDEI0gbQ8XSxitEaCXBGaQPhW7f4NoWxBUDgIhJBp+VuYmT8XYX8TWco7Tq3gXSFSzq/mjK5XkouKwjmcymzO23AOyY+sZ8uV18vLXjUCbgY+vJbGs+7QLp3mtrUyp4ePebIgNosC4HyiamX67fHtLpBcDYP3MOhgx36+j8="
