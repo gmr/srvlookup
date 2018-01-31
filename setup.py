@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='srvlookup',
-    version='1.0.0',
+    version='2.0.0',
     description='Service lookup using DNS SRV records',
     long_description=open('README.rst').read(),
     author='Gavin M. Roy',
@@ -21,7 +21,6 @@ setuptools.setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
