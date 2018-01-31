@@ -15,6 +15,7 @@ stages:
 
 install:
 - python setup.py develop
+- pip install awscli mock nose coverage
 
 script: nosetests
 
