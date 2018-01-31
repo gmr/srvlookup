@@ -2,7 +2,7 @@
 
 ## 2.0.0 - 2018-01-30
 - Drop support for Python 2.6
-- Include hostname in SRV tuple
+- Include hostname in SRV tuple (#5 - (optiz0r)[https://github.com/optiz0r])
 
 ## 1.0.0 - 2016-10-28
 - Stable release
