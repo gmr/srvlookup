@@ -116,7 +116,7 @@ class WhenInvokingQuerySRVRecords(unittest.TestCase):
             query.return_value = mock.Mock('dns.resolver.Answer')
             fqdn = 'foo.bar.baz'
             srvlookup._query_srv_records(fqdn)
-            query.assert_called_once_with(fqdn, 'SRV')
+            query.assert_called_once_with(fqdn, 'SRV', tcp=True)
 
     def test_should_return_resolver_answer(self):
         with mock.patch('dns.resolver.query') as query:

@@ -78,7 +78,7 @@ def _query_srv_records(fqdn):
 
     """
     try:
-        return resolver.query(fqdn, 'SRV')
+        return resolver.query(fqdn, 'SRV', tcp=True)
     except (resolver.NoAnswer, resolver.NoNameservers, resolver.NotAbsolute,
             resolver.NoRootSOA, resolver.NXDOMAIN) as error:
         LOGGER.error('Error querying SRV for %s: %r', fqdn, error)
