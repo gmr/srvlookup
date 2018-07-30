@@ -1,5 +1,12 @@
 # Contributing
 
+## Setup
+
+To setup your environment you can run in the root folder:
+```
+  pip install -r requirements.txt
+```
+
 ## Test Coverage
 
 To contribute to srvlookup, please make sure that any new features or changes
