@@ -53,8 +53,8 @@ def lookup(name, protocol='TCP', domain=None):
     :rtype: list of srvlookup.SRV
 
     """
-    answer = _query_srv_records('_%s._%s.%s' % (name, protocol,
-                                                domain or _get_domain()))
+    answer = _query_srv_records(
+        '_%s._%s.%s' % (name, protocol, domain or _get_domain()))
     results = _build_result_set(answer)
     return sorted(results, key=lambda r: (r.priority, -r.weight, r.host))
 
@@ -123,6 +123,7 @@ def _build_result_set(answer):
                     target.strip('.')) for address in resource_map[target])
         else:
             result_set.append(
-                SRV(target.rstrip('.'), resource.port, resource.priority,
+                SRV(
+                    target.rstrip('.'), resource.port, resource.priority,
                     resource.weight, target.strip('.')))
     return result_set
