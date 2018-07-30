@@ -4,3 +4,6 @@
 nosetests.xml
 .DS_Store
 .coverage
+.eggs/
+build/
+srvlookup.egg-info/
