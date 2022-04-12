@@ -11,7 +11,7 @@ setuptools.setup(
     py_modules=['srvlookup'],
     package_data={'': ['LICENSE', 'README.rst']},
     include_package_data=True,
-    install_requires=['dnspython>=1.15.0'],
+    install_requires=['dnspython>=2.0.0'],
     tests_require=['nose', 'mock', 'coverage'],
     test_suite='nose.collector',
     license='BSD',
