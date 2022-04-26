@@ -8,10 +8,9 @@ Use DNS SRV records to discover services by name and protocol.
 import collections
 import logging
 import socket
+import typing
 
 from dns import rdatatype, resolver
-
-__version__ = '2.0.0'
 
 LOGGER = logging.getLogger(__name__)
 
@@ -22,11 +21,13 @@ SRV = collections.namedtuple(
 class SRVQueryFailure(Exception):
     """Exception that is raised when the DNS query has failed."""
 
-    def __str__(self):
+    def __str__(self) -> str:
         return 'SRV query failure: %s' % self.args[0]
 
 
-def lookup(name, protocol='TCP', domain=None):
+def lookup(name: str, protocol: str = 'TCP',
+           domain: typing.Optional[str] = None,
+           tcp_resolver: bool = False) -> typing.List[SRV]:
     """Return a list of service records and associated data for the given
     service name, protocol and optional domain. If protocol is not specified,
     TCP will be used. If domain is not specified, the domain name returned by
@@ -47,45 +48,42 @@ def lookup(name, protocol='TCP', domain=None):
              hostname='host4.example.com')]
         >>>
 
-    :param str name: The service name
-    :param str protocol: The protocol name, defaults to TCP
-    :param str domain: The domain name to use, defaults to local domain name
-    :rtype: list of srvlookup.SRV
+    :param name: The service name
+    :param protocol: The protocol name, defaults to TCP
+    :param domain: The domain name to use, defaults to local domain name
 
     """
-    answer = _query_srv_records('_%s._%s.%s' % (name, protocol,
-                                                domain or _get_domain()))
+    answer = _query_srv_records(
+        f'_{name}._{protocol}.{domain or _get_domain()}', tcp_resolver)
     results = _build_result_set(answer)
     return sorted(results, key=lambda r: (r.priority, -r.weight, r.host))
 
 
-def _get_domain():
-    """Return the domain name for the local host.
-
-    :rtype: str
-
-    """
+def _get_domain() -> str:
+    """Return the domain name for the local host."""
     return '.'.join(socket.getfqdn().split('.')[1:])
 
 
-def _query_srv_records(fqdn):
+def _query_srv_records(fqdn: str, tcp_resolver: bool) -> resolver.Answer:
     """Query DNS for the SRV records of the fully-qualified domain name
     specified.
 
-    :param str fqdn: The fully-qualified domain name to query
-    :rtype: dns.resolver.Answer
+    :param fqdn: The fully-qualified domain name to query
     :raises: SRVQueryFailure
 
     """
     try:
-        return resolver.resolve(fqdn, 'SRV')
-    except (resolver.NoAnswer, resolver.NoNameservers, resolver.NotAbsolute,
-            resolver.NoRootSOA, resolver.NXDOMAIN) as error:
+        return resolver.resolve(fqdn, 'SRV', tcp=tcp_resolver)
+    except (resolver.NoAnswer,
+            resolver.NoNameservers,
+            resolver.NotAbsolute,
+            resolver.NoRootSOA,
+            resolver.NXDOMAIN) as error:
         LOGGER.error('Error querying SRV for %s: %r', fqdn, error)
         raise SRVQueryFailure(error.__class__.__name__)
 
 
-def _build_resource_to_address_map(answer):
+def _build_resource_to_address_map(answer: resolver.Answer) -> dict:
     """Return a dictionary that maps resource name to address.
 
     The response from any DNS query is a list of answer records and
@@ -96,8 +94,6 @@ def _build_resource_to_address_map(answer):
     contain A records for the resources.  This function collects them
     into a dictionary that maps resource name to an array of addresses.
 
-    :rtype: dict
-
     """
     mapping = collections.defaultdict(list)
     for resource in answer.response.additional:
@@ -107,12 +103,8 @@ def _build_resource_to_address_map(answer):
     return mapping
 
 
-def _build_result_set(answer):
-    """Return a list of SRV instances for a DNS answer.
-
-    :rtype: list of srvlookup.SRV
-
-    """
+def _build_result_set(answer: resolver.Answer) -> typing.List[SRV]:
+    """Return a list of SRV instances for a DNS answer"""
     resource_map = _build_resource_to_address_map(answer)
     result_set = []
     for resource in answer:

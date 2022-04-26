@@ -1,9 +1,10 @@
-import mock
 import unittest
+from unittest import mock
 
 from dns import message, name, resolver
 
 import srvlookup
+from srvlookup import main
 
 
 class WhenRaisingException(unittest.TestCase):
@@ -35,7 +36,7 @@ class WhenLookingUpRecords(unittest.TestCase):
         return message.from_text('\n'.join(message_body))
 
     def test_should_return_a_list_of_records(self):
-        with mock.patch('dns.resolver.query') as query:
+        with mock.patch('dns.resolver.resolve') as query:
             query_name = name.from_text('foo.bar.baz.')
             msg = self.get_message()
             answer = resolver.Answer(query_name, 33, 1, msg, msg.answer[0])
@@ -48,7 +49,7 @@ class WhenLookingUpRecords(unittest.TestCase):
 
     def test_should_include_local_domain_when_omitted(self):
 
-        with mock.patch('dns.resolver.query') as query:
+        with mock.patch('dns.resolver.resolve') as query:
             with mock.patch('socket.getfqdn') as getfqdn:
                 getfqdn.return_value = 'baz'
                 query_name = name.from_text('foo.bar.baz.')
@@ -63,7 +64,7 @@ class WhenLookingUpRecords(unittest.TestCase):
 
     def test_should_sort_records_by_priority_weight_and_host(self):
 
-        with mock.patch('dns.resolver.query') as query:
+        with mock.patch('dns.resolver.resolve') as query:
             query_name = name.from_text('foo.bar.baz.')
             msg = self.get_message(additional_answers=[
                 'foo.bar.baz. 0 IN SRV 0 0 11213 foo3.bar.baz.'
@@ -78,7 +79,7 @@ class WhenLookingUpRecords(unittest.TestCase):
                 ])
 
     def test_should_return_name_when_addt_record_is_missing(self):
-        with mock.patch('dns.resolver.query') as query:
+        with mock.patch('dns.resolver.resolve') as query:
             query_name = name.from_text('foo.bar.baz.')
             msg = self.get_message(additional_answers=[
                 'foo.bar.baz. 0 IN SRV 3 0 11213 foo3.bar.baz.'
@@ -101,26 +102,26 @@ class WhenInvokingGetDomain(unittest.TestCase):
     def test_should_return_domain_part_only(self):
         with mock.patch('socket.getfqdn') as getfqdn:
             getfqdn.return_value = self.VALUE
-            self.assertEqual(srvlookup._get_domain(), self.EXPECTATION)
+            self.assertEqual(main._get_domain(), self.EXPECTATION)
 
 
 class WhenInvokingQuerySRVRecords(unittest.TestCase):
     def test_invalid_should_raise_srv_query_failure(self):
-        with mock.patch('dns.resolver.query') as query:
+        with mock.patch('dns.resolver.resolve') as query:
             query.side_effect = resolver.NXDOMAIN()
             self.assertRaises(srvlookup.SRVQueryFailure,
-                              srvlookup._query_srv_records, 'foo.bar.baz')
+                              main._query_srv_records, 'foo.bar.baz', False)
 
     def test_resolver_query_should_be_invoked_with_fqdn(self):
-        with mock.patch('dns.resolver.query') as query:
+        with mock.patch('dns.resolver.resolve') as query:
             query.return_value = mock.Mock('dns.resolver.Answer')
             fqdn = 'foo.bar.baz'
-            srvlookup._query_srv_records(fqdn)
-            query.assert_called_once_with(fqdn, 'SRV')
+            main._query_srv_records(fqdn, False)
+            query.assert_called_once_with(fqdn, 'SRV', tcp=False)
 
     def test_should_return_resolver_answer(self):
-        with mock.patch('dns.resolver.query') as query:
+        with mock.patch('dns.resolver.resolve') as query:
             answer = mock.Mock('dns.resolver.Answer')
             query.return_value = answer
             self.assertEqual(
-                srvlookup._query_srv_records('foo.bar.baz'), answer)
+                main._query_srv_records('foo.bar.baz', False), answer)
